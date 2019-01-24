@@ -1,6 +1,6 @@
 default:
   autoload:
-    '': %paths.base%/test/features/bootstrap
+    '': paths.base/features/bootstrap
   extensions:
     Behat\MinkExtension:
       base_url:  'https://www.sicredi.com.br/html/ferramenta/simulador-investimento-poupanca/'
@@ -10,4 +10,4 @@ default:
       contexts:
         - FeatureContext
       paths:
-        - %paths.base%/features
+        - paths.base/features
