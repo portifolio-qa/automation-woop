@@ -17,6 +17,7 @@ O projeto de teste apresenta as seguintes tecnologias:
 ###Estrutura do Projeto:
 
 - automation-woop: pasta principal do projeto;
+- behat.yml: arquivo para utilizar o selenium;
 - features: funcionalidades relacionadas ao projeto - default do framework behat;
 - bootstrap: classes do projeto - default do framework behat (os steps: passos);
 - models: classes do projeto, foi criada para definir o padrão MVC;
