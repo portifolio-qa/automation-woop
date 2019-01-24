@@ -24,9 +24,9 @@ O projeto de teste apresenta as seguintes tecnologias:
 - woop: diretorio do projeto.
 - vendor: dependências do projeto, que foram definidas no composer.json;
 
-###Justificativa das tecnologas do projeto:
+###Justificativa das tecnologias do projeto:
 
- As seguintes tecnologia foram escolhidas devido a facilidade para utilizar o projeto com CI (integração contínua);
+ As seguintes tecnologias foram escolhidas, devido a facilidade para utilizar o projeto com CI (integração contínua);
 
  O projeto se adapta para qualquer linguagem;
 
