@@ -13,7 +13,6 @@ namespace Symfony\Component\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -22,9 +21,10 @@ use Symfony\Component\DependencyInjection\Reference;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class ReplaceAliasByActualDefinitionPass extends AbstractRecursivePass
+class ReplaceAliasByActualDefinitionPass implements CompilerPassInterface
 {
-    private $replacements;
+    private $compiler;
+    private $formatter;
 
     /**
      * Process the Container to replace aliases with service definitions.
@@ -33,6 +33,9 @@ class ReplaceAliasByActualDefinitionPass extends AbstractRecursivePass
      */
     public function process(ContainerBuilder $container)
     {
+        // Setup
+        $this->compiler = $container->getCompiler();
+        $this->formatter = $this->compiler->getLoggingFormatter();
         // First collect all alias targets that need to be replaced
         $seenAliasTargets = array();
         $replacements = array();
@@ -44,7 +47,7 @@ class ReplaceAliasByActualDefinitionPass extends AbstractRecursivePass
             }
             // Check if target needs to be replaces
             if (isset($replacements[$targetId])) {
-                $container->setAlias($definitionId, $replacements[$targetId])->setPublic($target->isPublic())->setPrivate($target->isPrivate());
+                $container->setAlias($definitionId, $replacements[$targetId]);
             }
             // No need to process the same target twice
             if (isset($seenAliasTargets[$targetId])) {
@@ -54,41 +57,86 @@ class ReplaceAliasByActualDefinitionPass extends AbstractRecursivePass
             $seenAliasTargets[$targetId] = true;
             try {
                 $definition = $container->getDefinition($targetId);
-            } catch (ServiceNotFoundException $e) {
-                if ('' !== $e->getId() && '@' === $e->getId()[0]) {
-                    throw new ServiceNotFoundException($e->getId(), $e->getSourceId(), null, array(substr($e->getId(), 1)));
-                }
-
-                throw $e;
+            } catch (InvalidArgumentException $e) {
+                throw new InvalidArgumentException(sprintf('Unable to replace alias "%s" with actual definition "%s".', $definitionId, $targetId), null, $e);
             }
             if ($definition->isPublic()) {
                 continue;
             }
             // Remove private definition and schedule for replacement
-            $definition->setPublic(!$target->isPrivate());
-            $definition->setPrivate($target->isPrivate());
+            $definition->setPublic(true);
             $container->setDefinition($definitionId, $definition);
             $container->removeDefinition($targetId);
             $replacements[$targetId] = $definitionId;
         }
-        $this->replacements = $replacements;
 
-        parent::process($container);
-        $this->replacements = array();
+        // Now replace target instances in all definitions
+        foreach ($container->getDefinitions() as $definitionId => $definition) {
+            $definition->setArguments($this->updateArgumentReferences($replacements, $definitionId, $definition->getArguments()));
+            $definition->setMethodCalls($this->updateArgumentReferences($replacements, $definitionId, $definition->getMethodCalls()));
+            $definition->setProperties($this->updateArgumentReferences($replacements, $definitionId, $definition->getProperties()));
+            $definition->setFactoryService($this->updateFactoryReferenceId($replacements, $definition->getFactoryService(false)), false);
+            $definition->setFactory($this->updateFactoryReference($replacements, $definition->getFactory()));
+        }
     }
 
     /**
-     * {@inheritdoc}
+     * Recursively updates references in an array.
+     *
+     * @param array  $replacements Table of aliases to replace
+     * @param string $definitionId Identifier of this definition
+     * @param array  $arguments    Where to replace the aliases
+     *
+     * @return array
      */
-    protected function processValue($value, $isRoot = false)
+    private function updateArgumentReferences(array $replacements, $definitionId, array $arguments)
     {
-        if ($value instanceof Reference && isset($this->replacements[$referenceId = (string) $value])) {
+        foreach ($arguments as $k => $argument) {
+            // Handle recursion step
+            if (\is_array($argument)) {
+                $arguments[$k] = $this->updateArgumentReferences($replacements, $definitionId, $argument);
+                continue;
+            }
+            // Skip arguments that don't need replacement
+            if (!$argument instanceof Reference) {
+                continue;
+            }
+            $referenceId = (string) $argument;
+            if (!isset($replacements[$referenceId])) {
+                continue;
+            }
             // Perform the replacement
-            $newId = $this->replacements[$referenceId];
-            $value = new Reference($newId, $value->getInvalidBehavior());
-            $this->container->log($this, sprintf('Changed reference of service "%s" previously pointing to "%s" to "%s".', $this->currentId, $referenceId, $newId));
+            $newId = $replacements[$referenceId];
+            $arguments[$k] = new Reference($newId, $argument->getInvalidBehavior());
+            $this->compiler->addLogMessage($this->formatter->formatUpdateReference($this, $definitionId, $referenceId, $newId));
         }
 
-        return parent::processValue($value, $isRoot);
+        return $arguments;
+    }
+
+    /**
+     * Returns the updated reference for the factory service.
+     *
+     * @param array       $replacements Table of aliases to replace
+     * @param string|null $referenceId  Factory service reference identifier
+     *
+     * @return string|null
+     */
+    private function updateFactoryReferenceId(array $replacements, $referenceId)
+    {
+        if (null === $referenceId) {
+            return;
+        }
+
+        return isset($replacements[$referenceId]) ? $replacements[$referenceId] : $referenceId;
+    }
+
+    private function updateFactoryReference(array $replacements, $factory)
+    {
+        if (\is_array($factory) && $factory[0] instanceof Reference && isset($replacements[$referenceId = (string) $factory[0]])) {
+            $factory[0] = new Reference($replacements[$referenceId], $factory[0]->getInvalidBehavior());
+        }
+
+        return $factory;
     }
 }

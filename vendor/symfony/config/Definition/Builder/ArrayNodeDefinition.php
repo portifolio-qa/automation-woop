@@ -39,7 +39,7 @@ class ArrayNodeDefinition extends NodeDefinition implements ParentNodeDefinition
     /**
      * {@inheritdoc}
      */
-    public function __construct(?string $name, NodeParentInterface $parent = null)
+    public function __construct($name, NodeParentInterface $parent = null)
     {
         parent::__construct($name, $parent);
 
@@ -73,62 +73,6 @@ class ArrayNodeDefinition extends NodeDefinition implements ParentNodeDefinition
     public function prototype($type)
     {
         return $this->prototype = $this->getNodeBuilder()->node(null, $type)->setParent($this);
-    }
-
-    /**
-     * @return VariableNodeDefinition
-     */
-    public function variablePrototype()
-    {
-        return $this->prototype('variable');
-    }
-
-    /**
-     * @return ScalarNodeDefinition
-     */
-    public function scalarPrototype()
-    {
-        return $this->prototype('scalar');
-    }
-
-    /**
-     * @return BooleanNodeDefinition
-     */
-    public function booleanPrototype()
-    {
-        return $this->prototype('boolean');
-    }
-
-    /**
-     * @return IntegerNodeDefinition
-     */
-    public function integerPrototype()
-    {
-        return $this->prototype('integer');
-    }
-
-    /**
-     * @return FloatNodeDefinition
-     */
-    public function floatPrototype()
-    {
-        return $this->prototype('float');
-    }
-
-    /**
-     * @return ArrayNodeDefinition
-     */
-    public function arrayPrototype()
-    {
-        return $this->prototype('array');
-    }
-
-    /**
-     * @return EnumNodeDefinition
-     */
-    public function enumPrototype()
-    {
-        return $this->prototype('enum');
     }
 
     /**
@@ -393,7 +337,7 @@ class ArrayNodeDefinition extends NodeDefinition implements ParentNodeDefinition
     protected function createNode()
     {
         if (null === $this->prototype) {
-            $node = new ArrayNode($this->name, $this->parent, $this->pathSeparator);
+            $node = new ArrayNode($this->name, $this->parent);
 
             $this->validateConcreteNode($node);
 
@@ -404,7 +348,7 @@ class ArrayNodeDefinition extends NodeDefinition implements ParentNodeDefinition
                 $node->addChild($child->getNode());
             }
         } else {
-            $node = new PrototypedArrayNode($this->name, $this->parent, $this->pathSeparator);
+            $node = new PrototypedArrayNode($this->name, $this->parent);
 
             $this->validatePrototypeNode($node);
 
@@ -412,7 +356,7 @@ class ArrayNodeDefinition extends NodeDefinition implements ParentNodeDefinition
                 $node->setKeyAttribute($this->key, $this->removeKeyItem);
             }
 
-            if (true === $this->atLeastOne || false === $this->allowEmptyValue) {
+            if (true === $this->atLeastOne) {
                 $node->setMinNumberOfElements(1);
             }
 
@@ -437,7 +381,6 @@ class ArrayNodeDefinition extends NodeDefinition implements ParentNodeDefinition
         $node->addEquivalentValue(false, $this->falseEquivalent);
         $node->setPerformDeepMerging($this->performDeepMerging);
         $node->setRequired($this->required);
-        $node->setDeprecated($this->deprecationMessage);
         $node->setIgnoreExtraKeys($this->ignoreExtraKeys, $this->removeExtraKeys);
         $node->setNormalizeKeys($this->normalizeKeys);
 
@@ -469,10 +412,6 @@ class ArrayNodeDefinition extends NodeDefinition implements ParentNodeDefinition
 
         if (null !== $this->key) {
             throw new InvalidDefinitionException(sprintf('->useAttributeAsKey() is not applicable to concrete nodes at path "%s"', $path));
-        }
-
-        if (false === $this->allowEmptyValue) {
-            throw new InvalidDefinitionException(sprintf('->cannotBeEmpty() is not applicable to concrete nodes at path "%s"', $path));
         }
 
         if (true === $this->atLeastOne) {
@@ -514,13 +453,5 @@ class ArrayNodeDefinition extends NodeDefinition implements ParentNodeDefinition
                 throw new InvalidDefinitionException(sprintf('->addDefaultChildrenIfNoneSet() might not set default children names as ->useAttributeAsKey() is not used at path "%s"', $path));
             }
         }
-    }
-
-    /**
-     * @return NodeDefinition[]
-     */
-    public function getChildNodeDefinitions()
-    {
-        return $this->children;
     }
 }

@@ -15,7 +15,6 @@ use Behat\Behat\Tester\Exception\FeatureHasNoBackgroundException;
 use Behat\Behat\Tester\StepContainerTester;
 use Behat\Gherkin\Node\FeatureNode;
 use Behat\Testwork\Environment\Environment;
-use Behat\Testwork\Tester\Result\IntegerTestResult;
 use Behat\Testwork\Tester\Result\TestResult;
 use Behat\Testwork\Tester\Result\TestResults;
 use Behat\Testwork\Tester\Setup\SuccessfulSetup;
@@ -63,10 +62,6 @@ final class RuntimeBackgroundTester implements BackgroundTester
                 'Feature `%s` has no background that could be tested.',
                 $feature->getFile()
             ), $feature);
-        }
-
-        if (!$background->hasSteps()) {
-            return new IntegerTestResult(TestResult::PASSED);
         }
 
         $results = $this->containerTester->test($env, $feature, $background, $skip);

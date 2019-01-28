@@ -57,7 +57,7 @@ class DelegatingLoaderTest extends TestCase
     }
 
     /**
-     * @expectedException \Symfony\Component\Config\Exception\LoaderLoadException
+     * @expectedException \Symfony\Component\Config\Exception\FileLoaderLoadException
      */
     public function testLoadThrowsAnExceptionIfTheResourceCannotBeLoaded()
     {

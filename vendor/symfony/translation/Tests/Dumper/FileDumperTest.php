@@ -28,32 +28,26 @@ class FileDumperTest extends TestCase
         $dumper->dump($catalogue, array('path' => $tempDir));
 
         $this->assertFileExists($tempDir.'/messages.en.concrete');
-
-        @unlink($tempDir.'/messages.en.concrete');
     }
 
-    public function testDumpIntl()
+    public function testDumpBackupsFileIfExisting()
     {
         $tempDir = sys_get_temp_dir();
+        $file = $tempDir.'/messages.en.concrete';
+        $backupFile = $file.'~';
+
+        @touch($file);
 
         $catalogue = new MessageCatalogue('en');
-        $catalogue->add(array('foo' => 'bar'), 'd1');
-        $catalogue->add(array('bar' => 'foo'), 'd1+intl-icu');
-        $catalogue->add(array('bar' => 'foo'), 'd2+intl-icu');
+        $catalogue->add(array('foo' => 'bar'));
 
         $dumper = new ConcreteFileDumper();
-        @unlink($tempDir.'/d2.en.concrete');
         $dumper->dump($catalogue, array('path' => $tempDir));
 
-        $this->assertStringEqualsFile($tempDir.'/d1.en.concrete', 'foo=bar');
-        @unlink($tempDir.'/d1.en.concrete');
+        $this->assertFileExists($backupFile);
 
-        $this->assertStringEqualsFile($tempDir.'/d1+intl-icu.en.concrete', 'bar=foo');
-        @unlink($tempDir.'/d1+intl-icu.en.concrete');
-
-        $this->assertFileNotExists($tempDir.'/d2.en.concrete');
-        $this->assertStringEqualsFile($tempDir.'/d2+intl-icu.en.concrete', 'bar=foo');
-        @unlink($tempDir.'/d2+intl-icu.en.concrete');
+        @unlink($file);
+        @unlink($backupFile);
     }
 
     public function testDumpCreatesNestedDirectoriesAndFile()
@@ -80,7 +74,7 @@ class ConcreteFileDumper extends FileDumper
 {
     public function formatCatalogue(MessageCatalogue $messages, $domain, array $options = array())
     {
-        return http_build_query($messages->all($domain), '', '&');
+        return '';
     }
 
     protected function getExtension()

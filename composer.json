@@ -1,17 +1,27 @@
 {  
     "name": "rosedias/automation-woop",
-       "license": "MIT",
-       "authors": [
-           {
-               "name": "Rose Dias",
-               "email": "rosedias.info@gmail.com"
-           }
+    "description": "Projeto para Woop",
+    "license": "MIT",
+    "authors": [
+        {
+        "name": "Rose Dias",
+        "email": "rosedias.info@gmail.com"
+        }
        ],
-       "require": {},
-       "require-dev": {
-           "behat/behat": "^3.4",
-           "behat/mink-extension": "^2.2",
-           "behat/mink-goutte-driver": "~1.2",
-           "behat/mink-selenium2-driver": "~1.2"
+    "autoload": {
+      "psr-4": {
+        "E2E\\Test\\": "tests/acceptance/"
+      }
+    },
+    "require-dev": {
+      "phpunit/phpunit": "4.8",
+      "behat/behat": "3.0.15",
+      "behat/mink": "^1.7",
+      "behat/mink-selenium2-driver": "^1.3",
+      "behat/mink-extension": "^2.2",
+      "facebook/webdriver": "dev-master",
+      "hamcrest/hamcrest-php": "1.2.2",
+      "emuse/behat-html-formatter": "0.1.*"
     }
-    }
+  }
+

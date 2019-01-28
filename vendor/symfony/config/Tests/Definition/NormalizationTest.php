@@ -22,9 +22,9 @@ class NormalizationTest extends TestCase
      */
     public function testNormalizeEncoders($denormalized)
     {
-        $tb = new TreeBuilder('root_name', 'array');
+        $tb = new TreeBuilder();
         $tree = $tb
-            ->getRootNode()
+            ->root('root_name', 'array')
                 ->fixXmlConfig('encoder')
                 ->children()
                     ->node('encoders', 'array')
@@ -97,9 +97,9 @@ class NormalizationTest extends TestCase
      */
     public function testAnonymousKeysArray($denormalized)
     {
-        $tb = new TreeBuilder('root', 'array');
+        $tb = new TreeBuilder();
         $tree = $tb
-            ->getRootNode()
+            ->root('root', 'array')
                 ->children()
                     ->node('logout', 'array')
                         ->fixXmlConfig('handler')
@@ -186,9 +186,9 @@ class NormalizationTest extends TestCase
 
     public function testAssociativeArrayPreserveKeys()
     {
-        $tb = new TreeBuilder('root', 'array');
+        $tb = new TreeBuilder();
         $tree = $tb
-            ->getRootNode()
+            ->root('root', 'array')
                 ->prototype('array')
                     ->children()
                         ->node('foo', 'scalar')->end()
@@ -210,9 +210,9 @@ class NormalizationTest extends TestCase
 
     private function getNumericKeysTestTree()
     {
-        $tb = new TreeBuilder('root', 'array');
+        $tb = new TreeBuilder();
         $tree = $tb
-            ->getRootNode()
+            ->root('root', 'array')
                 ->children()
                     ->node('thing', 'array')
                         ->useAttributeAsKey('id')

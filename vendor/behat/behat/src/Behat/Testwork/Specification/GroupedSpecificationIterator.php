@@ -95,10 +95,6 @@ final class GroupedSpecificationIterator implements SpecificationIterator
      */
     public function next()
     {
-        if (!isset($this->iterators[$this->position])) {
-            return;
-        }
-
         $this->iterators[$this->position]->next();
         while (!$this->iterators[$this->position]->valid()) {
             $this->position++;

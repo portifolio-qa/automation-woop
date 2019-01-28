@@ -78,7 +78,7 @@ final class ConsoleDefinitionInformationPrinter extends ConsoleDefinitionPrinter
         $lines[] = strtr(
             '{suite} <def_dimmed>|</def_dimmed> <info>{type}</info> <def_regex>{regex}</def_regex>', array(
                 '{suite}' => $suite->getName(),
-                '{type}'  => $this->getDefinitionType($definition),
+                '{type}'  => $definition->getType(),
                 '{regex}' => $pattern,
             )
         );
@@ -130,17 +130,6 @@ final class ConsoleDefinitionInformationPrinter extends ConsoleDefinitionPrinter
                 '{path}'  => $definition->getPath()
             )
         );
-
-        if ($this->isVerbose()) {
-            $lines[] = strtr(
-                '{space}<def_dimmed>|</def_dimmed> on `{filepath}[{start}:{end}]`', array(
-                    '{space}' => str_pad('', mb_strlen($suite->getName(), 'utf8') + 1),
-                    '{filepath}' => $definition->getReflection()->getFileName(),
-                    '{start}' => $definition->getReflection()->getStartLine(),
-                    '{end}' => $definition->getReflection()->getEndLine()
-                )
-            );
-        }
 
         return $lines;
     }

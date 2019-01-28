@@ -15,10 +15,8 @@ use Behat\Behat\Definition\ServiceContainer\DefinitionExtension;
 use Behat\Behat\EventDispatcher\ServiceContainer\EventDispatcherExtension;
 use Behat\Behat\Gherkin\ServiceContainer\GherkinExtension;
 use Behat\Behat\Hook\ServiceContainer\HookExtension;
-use Behat\Behat\Output\ServiceContainer\Formatter\JUnitFormatterFactory;
 use Behat\Behat\Output\ServiceContainer\Formatter\PrettyFormatterFactory;
 use Behat\Behat\Output\ServiceContainer\Formatter\ProgressFormatterFactory;
-use Behat\Behat\HelperContainer\ServiceContainer\HelperContainerExtension;
 use Behat\Behat\Snippet\ServiceContainer\SnippetExtension;
 use Behat\Behat\Tester\ServiceContainer\TesterExtension;
 use Behat\Behat\Transformation\ServiceContainer\TransformationExtension;
@@ -31,7 +29,6 @@ use Behat\Testwork\Cli\ServiceContainer\CliExtension;
 use Behat\Testwork\Environment\ServiceContainer\EnvironmentExtension;
 use Behat\Testwork\Exception\ServiceContainer\ExceptionExtension;
 use Behat\Testwork\Filesystem\ServiceContainer\FilesystemExtension;
-use Behat\Testwork\Ordering\ServiceContainer\OrderingExtension;
 use Behat\Testwork\Output\ServiceContainer\Formatter\FormatterFactory;
 use Behat\Testwork\Output\ServiceContainer\OutputExtension;
 use Behat\Testwork\ServiceContainer\ServiceProcessor;
@@ -46,7 +43,7 @@ use Behat\Testwork\Translator\ServiceContainer\TranslatorExtension;
  */
 final class ApplicationFactory extends BaseFactory
 {
-    const VERSION = '3.5.0';
+    const VERSION = '3.0.15';
 
     /**
      * {@inheritdoc}
@@ -92,8 +89,6 @@ final class ApplicationFactory extends BaseFactory
             new EventDispatcherExtension($processor),
             new HookExtension(),
             new TransformationExtension($processor),
-            new OrderingExtension($processor),
-            new HelperContainerExtension($processor)
         );
     }
 
@@ -110,23 +105,19 @@ final class ApplicationFactory extends BaseFactory
      */
     protected function getConfigPath()
     {
-        $cwd = rtrim(getcwd(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        $configDir = $cwd . 'config' . DIRECTORY_SEPARATOR;
-        $paths = array(
-            $cwd . 'behat.yaml',
-            $cwd . 'behat.yml',
-            $cwd . 'behat.yaml.dist',
-            $cwd . 'behat.yml.dist',
-            $configDir . 'behat.yaml',
-            $configDir . 'behat.yml',
-            $configDir . 'behat.yaml.dist',
-            $configDir . 'behat.yml.dist',
+        $cwd = rtrim(getcwd(), DIRECTORY_SEPARATOR);
+        $paths = array_filter(
+            array(
+                $cwd . DIRECTORY_SEPARATOR . 'behat.yml',
+                $cwd . DIRECTORY_SEPARATOR . 'behat.yml.dist',
+                $cwd . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'behat.yml',
+                $cwd . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'behat.yml.dist',
+            ),
+            'is_file'
         );
 
-        foreach ($paths as $path) {
-            if (is_file($path)) {
-                return $path;
-            }
+        if (count($paths)) {
+            return current($paths);
         }
 
         return null;
@@ -144,7 +135,6 @@ final class ApplicationFactory extends BaseFactory
         return array(
             new PrettyFormatterFactory($processor),
             new ProgressFormatterFactory($processor),
-            new JUnitFormatterFactory(),
         );
     }
 }

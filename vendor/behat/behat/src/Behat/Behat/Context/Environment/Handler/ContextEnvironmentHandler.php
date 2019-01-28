@@ -10,10 +10,6 @@
 
 namespace Behat\Behat\Context\Environment\Handler;
 
-use Behat\Behat\Context\Argument\SuiteScopedResolverFactory;
-use Behat\Behat\Context\Argument\SuiteScopedResolverFactoryAdapter;
-use Behat\Behat\Context\Argument\ArgumentResolverFactory;
-use Behat\Behat\Context\Argument\NullFactory;
 use Behat\Behat\Context\ContextClass\ClassResolver;
 use Behat\Behat\Context\ContextFactory;
 use Behat\Behat\Context\Environment\InitializedContextEnvironment;
@@ -36,11 +32,7 @@ final class ContextEnvironmentHandler implements EnvironmentHandler
     /**
      * @var ContextFactory
      */
-    private $contextFactory;
-    /**
-     * @var ArgumentResolverFactory
-     */
-    private $resolverFactory;
+    private $factory;
     /**
      * @var ClassResolver[]
      */
@@ -49,18 +41,11 @@ final class ContextEnvironmentHandler implements EnvironmentHandler
     /**
      * Initializes handler.
      *
-     * @param ContextFactory                                     $factory
-     * @param ArgumentResolverFactory|SuiteScopedResolverFactory $resolverFactory
+     * @param ContextFactory $factory
      */
-    public function __construct(ContextFactory $factory, $resolverFactory = null)
+    public function __construct(ContextFactory $factory)
     {
-        $this->contextFactory = $factory;
-
-        if ($resolverFactory && !$resolverFactory instanceof ArgumentResolverFactory) {
-            $resolverFactory = new SuiteScopedResolverFactoryAdapter($resolverFactory);
-        }
-
-        $this->resolverFactory = $resolverFactory ?: new NullFactory();
+        $this->factory = $factory;
     }
 
     /**
@@ -115,10 +100,8 @@ final class ContextEnvironmentHandler implements EnvironmentHandler
         }
 
         $environment = new InitializedContextEnvironment($uninitializedEnvironment->getSuite());
-        $resolvers = $this->resolverFactory->createArgumentResolvers($environment);
-
         foreach ($uninitializedEnvironment->getContextClassesWithArguments() as $class => $arguments) {
-            $context = $this->contextFactory->createContext($class, $arguments, $resolvers);
+            $context = $this->factory->createContext($class, $arguments);
             $environment->registerContext($context);
         }
 

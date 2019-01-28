@@ -11,7 +11,6 @@
 namespace Behat\Behat\Definition\Pattern\Policy;
 
 use Behat\Behat\Definition\Pattern\Pattern;
-use Behat\Behat\Definition\Exception\InvalidPatternException;
 use Behat\Transliterator\Transliterator;
 
 /**
@@ -21,7 +20,7 @@ use Behat\Transliterator\Transliterator;
  */
 final class TurnipPatternPolicy implements PatternPolicy
 {
-    const TOKEN_REGEX = "[\"']?(?P<%s>(?<=\")[^\"]*(?=\")|(?<=')[^']*(?=')|\-?[\w\.\,]+)['\"]?";
+    const TOKEN_REGEX = "[\"']?(?P<%s>(?<=\")[^\"]*(?=\")|(?<=')[^']*(?=')|[\w\.\,]+)['\"]?";
 
     const PLACEHOLDER_REGEXP = "/\\\:(\w+)/";
     const OPTIONAL_WORD_REGEXP = '/(\s)?\\\\\(([^\\\]+)\\\\\)(\s)?/';
@@ -30,15 +29,10 @@ final class TurnipPatternPolicy implements PatternPolicy
     /**
      * @var string[]
      */
-    private $regexCache = array();
-
-    /**
-     * @var string[]
-     */
     private static $placeholderPatterns = array(
         "/(?<!\w)\"[^\"]+\"(?!\w)/",
         "/(?<!\w)'[^']+'(?!\w)/",
-        "/(?<!\w|\.|\,)\-?\d+(?:[\.\,]\d+)?(?!\w|\.|\,)/"
+        "/(?<!\w|\.|\,)\d+(?:[\.\,]\d+)?(?!\w|\.|\,)/"
     );
 
     /**
@@ -82,25 +76,13 @@ final class TurnipPatternPolicy implements PatternPolicy
      */
     public function transformPatternToRegex($pattern)
     {
-        if (!isset($this->regexCache[$pattern])) {
-            $this->regexCache[$pattern] = $this->createTransformedRegex($pattern);
-        }
-        return $this->regexCache[$pattern];
-    }
-
-    /**
-     * @param string $pattern
-     * @return string
-     */
-    private function createTransformedRegex($pattern)
-    {
         $regex = preg_quote($pattern, '/');
 
         $regex = $this->replaceTokensWithRegexCaptureGroups($regex);
         $regex = $this->replaceTurnipOptionalEndingWithRegex($regex);
         $regex = $this->replaceTurnipAlternativeWordsWithRegex($regex);
 
-        return '/^' . $regex . '$/iu';
+        return '/^' . $regex . '$/i';
     }
 
     /**
@@ -133,20 +115,9 @@ final class TurnipPatternPolicy implements PatternPolicy
 
         return preg_replace_callback(
             self::PLACEHOLDER_REGEXP,
-            array($this, 'replaceTokenWithRegexCaptureGroup'),
+            function ($match) use ($tokenRegex) { return sprintf($tokenRegex, $match[1]); },
             $regex
         );
-    }
-
-    private function replaceTokenWithRegexCaptureGroup($tokenMatch)
-    {
-        if (strlen($tokenMatch[1]) >= 32) {
-            throw new InvalidPatternException(
-                "Token name should not exceed 32 characters, but `{$tokenMatch[1]}` was used."
-            );
-        }
-
-        return sprintf(self::TOKEN_REGEX, $tokenMatch[1]);
     }
 
     /**

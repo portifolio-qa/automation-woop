@@ -1,13 +1,27 @@
+# behat.yml
 default:
+  formatters: 
+    html:
+      output_path: %paths.base%/relatorios
+
+  extensions:
+    emuse\BehatHTMLFormatter\BehatHTMLFormatterExtension:
+      name: html
+      renderer: Twig
+      file_name: relatorio
   autoload:
-    '': paths.base/features/bootstrap
+    - %paths.base%/tests/acceptance/
   extensions:
     Behat\MinkExtension:
-      base_url:  'https://www.sicredi.com.br/html/ferramenta/simulador-investimento-poupanca/'
-      selenium2: ~
+      base_url: http://php:8080/
+      sessions:
+        default_session:
+          selenium2:
+            wd_host: 'http://selenium:4444/wd/hub'
   suites:
-    default:
-      contexts:
-        - FeatureContext
+    cad_user:
       paths:
-        - paths.base/features
+        - %paths.base%/tests/acceptance/features/simulador_invest.feature
+      contexts:
+        - SimuladorInvestContext
+  

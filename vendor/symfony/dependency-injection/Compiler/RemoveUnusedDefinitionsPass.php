@@ -12,24 +12,22 @@
 namespace Symfony\Component\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Removes unused service definitions from the container.
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
- * @author Nicolas Grekas <p@tchwork.com>
  */
-class RemoveUnusedDefinitionsPass extends AbstractRecursivePass implements RepeatablePassInterface
+class RemoveUnusedDefinitionsPass implements RepeatablePassInterface
 {
-    private $connectedIds = array();
+    private $repeatedPass;
 
     /**
      * {@inheritdoc}
      */
     public function setRepeatedPass(RepeatedPass $repeatedPass)
     {
-        @trigger_error(sprintf('The "%s()" method is deprecated since Symfony 4.2.', __METHOD__), E_USER_DEPRECATED);
+        $this->repeatedPass = $repeatedPass;
     }
 
     /**
@@ -37,62 +35,48 @@ class RemoveUnusedDefinitionsPass extends AbstractRecursivePass implements Repea
      */
     public function process(ContainerBuilder $container)
     {
-        try {
-            $this->enableExpressionProcessing();
-            $this->container = $container;
-            $connectedIds = array();
-            $aliases = $container->getAliases();
+        $compiler = $container->getCompiler();
+        $formatter = $compiler->getLoggingFormatter();
+        $graph = $compiler->getServiceReferenceGraph();
 
-            foreach ($aliases as $id => $alias) {
-                if ($alias->isPublic()) {
-                    $this->connectedIds[] = (string) $aliases[$id];
-                }
+        $hasChanged = false;
+        foreach ($container->getDefinitions() as $id => $definition) {
+            if ($definition->isPublic()) {
+                continue;
             }
 
-            foreach ($container->getDefinitions() as $id => $definition) {
-                if ($definition->isPublic()) {
-                    $connectedIds[$id] = true;
-                    $this->processValue($definition);
-                }
-            }
+            if ($graph->hasNode($id)) {
+                $edges = $graph->getNode($id)->getInEdges();
+                $referencingAliases = array();
+                $sourceIds = array();
+                foreach ($edges as $edge) {
+                    $node = $edge->getSourceNode();
+                    $sourceIds[] = $node->getId();
 
-            while ($this->connectedIds) {
-                $ids = $this->connectedIds;
-                $this->connectedIds = array();
-                foreach ($ids as $id) {
-                    if (!isset($connectedIds[$id]) && $container->hasDefinition($id)) {
-                        $connectedIds[$id] = true;
-                        $this->processValue($container->getDefinition($id));
+                    if ($node->isAlias()) {
+                        $referencingAliases[] = $node->getValue();
                     }
                 }
+                $isReferenced = (\count(array_unique($sourceIds)) - \count($referencingAliases)) > 0;
+            } else {
+                $referencingAliases = array();
+                $isReferenced = false;
             }
 
-            foreach ($container->getDefinitions() as $id => $definition) {
-                if (!isset($connectedIds[$id])) {
-                    $container->removeDefinition($id);
-                    $container->resolveEnvPlaceholders(serialize($definition));
-                    $container->log($this, sprintf('Removed service "%s"; reason: unused.', $id));
-                }
+            if (1 === \count($referencingAliases) && false === $isReferenced) {
+                $container->setDefinition((string) reset($referencingAliases), $definition);
+                $definition->setPublic(true);
+                $container->removeDefinition($id);
+                $compiler->addLogMessage($formatter->formatRemoveService($this, $id, 'replaces alias '.reset($referencingAliases)));
+            } elseif (0 === \count($referencingAliases) && false === $isReferenced) {
+                $container->removeDefinition($id);
+                $compiler->addLogMessage($formatter->formatRemoveService($this, $id, 'unused'));
+                $hasChanged = true;
             }
-        } finally {
-            $this->container = null;
-            $this->connectedIds = array();
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function processValue($value, $isRoot = false)
-    {
-        if (!$value instanceof Reference) {
-            return parent::processValue($value);
         }
 
-        if (ContainerBuilder::IGNORE_ON_UNINITIALIZED_REFERENCE !== $value->getInvalidBehavior()) {
-            $this->connectedIds[] = (string) $value;
+        if ($hasChanged) {
+            $this->repeatedPass->setRepeat();
         }
-
-        return $value;
     }
 }
