@@ -1,12 +1,12 @@
 # automation-woop
-Projeto Testes Automatizados Woop
+# Projeto Testes Automatizados Woop
 
 * vendor/bin/behat
 * vendor/bin/behat --dry-run --append-snippets
 * docker-compose up -d (subir o ambiente)
 * Não esqueça, para rodar o projeto, o container docker deve estar levantado (docker-compose up)
 
-###Técnicas de testes escolhida:
+# Técnicas de testes escolhida:
 
 O projeto de teste apresenta as seguintes tecnologias:
 
@@ -20,7 +20,7 @@ O projeto de teste apresenta as seguintes tecnologias:
 - Desing Patterns: Observer PHP;
 - Page Objects: Facebook WebDriver
 
-###Estrutura do Projeto:
+# Estrutura do Projeto:
 
 - automation-woop: pasta principal do projeto;
 - behat.yml: arquivo de configuraçao do framework behat;
@@ -36,7 +36,7 @@ O projeto de teste apresenta as seguintes tecnologias:
 - src: pasta com as classses do desing patterns (Observer PHP)
 - fixtures: pasta criada para integrar o projeto com Banco de Dados, criar massa de dados
 
-###Justificativa das tecnologias do projeto:
+# Justificativa das tecnologias do projeto:
 
  As seguintes tecnologias foram escolhidas, devido a facilidade para utilizar o projeto com CI (integração contínua);
 
@@ -46,7 +46,7 @@ O projeto de teste apresenta as seguintes tecnologias:
 
  A tecnologia Docker, foi utilizada devido a facilidade de montar e configurar o ambiente de desenvolvimento, sendo útil também na integração e criação do ambiente de desenvolvimento de integração contínua.
 
-###Execuçao do projeto:
+# Execuçao do projeto:
 
 * Gitclone: https://github.com/rosedias/automation-woop
 * Ter o docker instalado;
