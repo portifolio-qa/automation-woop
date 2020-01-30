@@ -1,10 +1,7 @@
 # automation-woop
 # Projeto Testes Automatizados Woop Digital
 
-* vendor/bin/behat
-* vendor/bin/behat --dry-run --append-snippets
-* docker-compose up -d (subir o ambiente)
-* Não esqueça, para rodar o projeto, o container docker deve estar levantado (docker-compose up)
+Este projeto, foi desenvolvido para o cliente: Sicredi Projeto: Woop Digital. Neste projeto, existia a possibilidade de desenvolver, conforme seu conhecimento, habilidades e tecnologias de dominio,no caso um projeto de livre desenvolvimento conforme seu skill, porém com as devidas justificativas. 
 
 # Técnicas de testes escolhida:
 
@@ -51,3 +48,9 @@ O projeto de teste apresenta as seguintes tecnologias:
 * Gitclone: https://github.com/rosedias/automation-woop
 * Ter o docker instalado;
 * Executar o dockercompose.yml para instalar as dependências do projeto: docker-compose up -d
+
+# Criar novos contextos:
+* vendor/bin/behat
+* vendor/bin/behat --dry-run --append-snippets
+* docker-compose up -d (subir o ambiente)
+* Não esqueça, para rodar o projeto, o container docker deve estar levantado (docker-compose up)
