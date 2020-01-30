@@ -1,5 +1,5 @@
 # automation-woop
-# Projeto Testes Automatizados Woop
+# Projeto Testes Automatizados Woop Digital
 
 * vendor/bin/behat
 * vendor/bin/behat --dry-run --append-snippets
