@@ -1,5 +1,5 @@
 # automation-woop
-# Projeto Testes Automatizados Woop Digital
+# Project - Automação Woop Digital
 
 Este projeto, foi desenvolvido para o cliente: Sicredi Projeto: Woop Digital. Neste projeto, existia a possibilidade de desenvolver, conforme seu conhecimento, habilidades e tecnologias de dominio,no caso um projeto de livre desenvolvimento conforme seu skill, porém com as devidas justificativas. 
 
