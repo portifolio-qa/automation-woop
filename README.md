@@ -1,7 +1,7 @@
 # automation-woop
 # Project - Automação Woop Digital
 
-Este projeto, foi desenvolvido para o cliente: Sicredi Projeto: Woop Digital. Neste projeto, existia a possibilidade de desenvolver, conforme seu conhecimento, habilidades e tecnologias de dominio,no caso um projeto de livre desenvolvimento conforme seu skill, porém com as devidas justificativas. 
+Este projeto, foi desenvolvido para o cliente: Sicredi Projeto: Woop Digital. Neste projeto, existia a possibilidade de desenvolver, conforme seu conhecimento, habilidades e tecnologias de domínio,no caso um projeto de livre desenvolvimento conforme seu skill, porém com as devidas justificativas. 
 
 # Técnicas de testes escolhida:
 
@@ -39,7 +39,7 @@ O projeto de teste apresenta as seguintes tecnologias:
 
  O projeto se adapta para qualquer linguagem;
 
- Como o projeto inicialmente solicita teste de interface e negócio, foi utilizada a tecnologia facebook webdriver que é um padrão da W3C, para simular as ações do usuário em um navegador web,  foi escoljido por ser um padrão aberto e pode ser implementado em qualquer linguagem de programação, ele foi desenvolvido em PHP, foi utilizado também a biblioteca Hamcrest que avalia se se os testes obtiveram a resposta esperada. Para testes de negócio, foi utilizado o framework Behat, que automatiza as ações do usuário e o  Behat HTML Formatter para gerar relatórios no formato HTML.
+ Como o projeto inicialmente solicita testes de interface e negócio, foi utilizada a tecnologia facebook webdriver que é um padrão da W3C, para simular as ações do usuário em um navegador web,  foi escolhido por ser um padrão aberto e pode ser implementado em qualquer linguagem de programação, ele foi desenvolvido em PHP, foi utilizado também a biblioteca Hamcrest que avalia se os testes obtiveram a resposta esperada. Para testes de negócio, foi utilizado o framework Behat, que automatiza as ações do usuário e o  Behat HTML Formatter para gerar relatórios no formato HTML.
 
  A tecnologia Docker, foi utilizada devido a facilidade de montar e configurar o ambiente de desenvolvimento, sendo útil também na integração e criação do ambiente de desenvolvimento de integração contínua.
 
